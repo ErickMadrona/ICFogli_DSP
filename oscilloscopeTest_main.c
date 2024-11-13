@@ -10,11 +10,9 @@
 #include "cputimer.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
-#include "pin_map.h"
 
 #define TIMER0_FREQUENCY 50000000 // 50 MHz
 #define SINE_POINTS 100 // DACA and DACB | AA0 and AA1
-#define DAC_GAIN 8 // Multiplies wave amplitude
 
 // Sine 0 data
 uint16_t sine0Output; // DAC output
@@ -35,7 +33,7 @@ void populateSineTable(int *table, uint16_t amplitude) {
         // Angle for each point
         double angle = (2.0 * M_PI * point) / SINE_POINTS;
         // Creates each point using the sine function
-        table[point] = (int)(sin(angle) * amplitude * DAC_GAIN);
+        table[point] = (int)((sin(angle) + 1) * amplitude / 2);
     }
 }
 
@@ -46,7 +44,7 @@ interrupt void timer0_ISR(void) {
     // Writes to DACA
     static uint16_t isine0 = 0;
     // Operators adapt the points to DAC range
-    sine0Output = sine0Offset + ((sine0Table[isine0] ^ 0x8000) >> 5);
+    sine0Output = sine0Offset + sine0Table[isine0];
     // Increments or resets the index (cyclic nature)
     if (isine0 < SINE_POINTS) {
         isine0 ++;
@@ -57,7 +55,7 @@ interrupt void timer0_ISR(void) {
     DAC_setShadowValue(DACA_BASE, sine0Output);
     // Writes to DACB
     static uint16_t isine1 = 0;
-    sine1Output = sine1Offset + ((sine1Table[isine1] ^ 0x8000) >> 5);
+    sine1Output = sine1Offset + sine1Table[isine1];
     if (isine1 < SINE_POINTS) {
         isine1 ++;
     } else {
