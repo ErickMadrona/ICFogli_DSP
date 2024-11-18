@@ -38,7 +38,7 @@ void main(void) {
     Interrupt_initModule();
     Interrupt_initVectorTable();
     // Stops and configures timer 0
-    const uint32_t timerPeriod = (uint32_t)(TIMER0_FREQUENCY / 10000); // About 1 second
+    const uint32_t timerPeriod = (uint32_t)(TIMER0_FREQUENCY / 10000); // About 100 us
     CPUTimer_stopTimer(CPUTIMER0_BASE);
     CPUTimer_setPeriod(CPUTIMER0_BASE, timerPeriod);
     CPUTimer_reloadTimerCounter(CPUTIMER0_BASE);
