@@ -10,6 +10,9 @@
 #include "interrupt.h" // For interrupt configuration
 #include "cputimer.h" // For timer use
 
+/*------------------------------MACROS------------------------------*/
+#define TIMER0_FREQUENCY 50000000 // 50 MHz
+
 // Timer 0 ISR
 interrupt void timer0_ISR(void) {
     // Toggles LED 2
@@ -35,7 +38,7 @@ void main(void) {
     Interrupt_initModule();
     Interrupt_initVectorTable();
     // Stops and configures timer 0
-    const uint32_t timerPeriod = (uint32_t)(1 * DEVICE_SYSCLK_FREQ); // About 1 second
+    const uint32_t timerPeriod = (uint32_t)(TIMER0_FREQUENCY / 10000); // About 1 second
     CPUTimer_stopTimer(CPUTIMER0_BASE);
     CPUTimer_setPeriod(CPUTIMER0_BASE, timerPeriod);
     CPUTimer_reloadTimerCounter(CPUTIMER0_BASE);
