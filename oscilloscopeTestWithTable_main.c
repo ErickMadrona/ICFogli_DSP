@@ -43,7 +43,6 @@ interrupt void timer0_ISR(void) {
     GPIO_togglePin(122);
     // Writes to DACA
     static uint16_t isine0 = 0;
-    // Operators adapt the points to DAC range
     sine0Output = sine0Offset + sine0Table[isine0];
     // Increments or resets the index (cyclic nature)
     if (isine0 < SINE_POINTS) {
