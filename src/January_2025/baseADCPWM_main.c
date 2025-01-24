@@ -41,10 +41,15 @@ double offsetDACA = 2048.0; // Shift wave X levels upward
 double frequencyDACA = 60.0; // Sine wave frequency in Hz
 
 // PWM1 parameters
+// Parameter history
+EPWM_TimeBaseCountMode lastCountModePWM1;
+uint16_t lastFrequencyPWM1;
+float lastDutyCyclePWM1;
+
+// Current parameters
 EPWM_TimeBaseCountMode countModePWM1 = EPWM_COUNTER_MODE_UP_DOWN;
 uint16_t frequencyPWM1 = 1000U;
 float dutyCyclePWM1 = 0.80; // Ranges from 0 to 1
-uint16_t phaseShiftPWM1 = 0U;
 
 /*------------------------------EPWM FUNCTIONS------------------------------*/
 
@@ -96,12 +101,15 @@ interrupt void timer0_ISR() {
     // Write to DACA
     uint16_t outputDACA = (uint16_t)(sin(TWO_PI * frequencyDACA * timeElapsed) * amplitudeDACA * 0.5 + offsetDACA);
     DAC_setShadowValue(DACA_BASE, outputDACA);
-    // Update PWM1
-    if (fmod(timeElapsed, 3.0) < 0.05) {
+    // Update PWM1 when a parameter has changed
+    if (countModePWM1 != lastCountModePWM1 || frequencyPWM1 != lastFrequencyPWM1 || dutyCyclePWM1 != lastDutyCyclePWM1) {
         setPWMFrequency(EPWM1_BASE, EPWM_COUNTER_MODE_UP_DOWN, frequencyPWM1);
         setPWMDutyCycle(EPWM1_BASE, EPWM_COUNTER_MODE_UP_DOWN, EPWM_COUNTER_COMPARE_A, dutyCyclePWM1);
         setPWMDutyCycle(EPWM1_BASE, EPWM_COUNTER_MODE_UP_DOWN, EPWM_COUNTER_COMPARE_B, dutyCyclePWM1);
-        EPWM_setPhaseShift(EPWM1_BASE, phaseShiftPWM1);
+        // Update parameter history
+        lastCountModePWM1 = countModePWM1;
+        lastFrequencyPWM1 = frequencyPWM1;
+        lastDutyCyclePWM1 = dutyCyclePWM1;
     }
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
